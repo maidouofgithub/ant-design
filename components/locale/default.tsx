@@ -2,8 +2,9 @@ import Pagination from 'rc-pagination/lib/locale/en_US';
 import DatePicker from '../date-picker/locale/en_US';
 import TimePicker from '../time-picker/locale/en_US';
 import Calendar from '../calendar/locale/en_US';
+import { Locale } from '../locale-provider';
 
-export default {
+const localeValues: Locale = {
   locale: 'en',
   Pagination,
   DatePicker,
@@ -18,9 +19,13 @@ export default {
     filterReset: 'Reset',
     selectAll: 'Select current page',
     selectInvert: 'Invert current page',
+    selectionAll: 'Select all data',
     sortTitle: 'Sort',
     expand: 'Expand row',
     collapse: 'Collapse row',
+    triggerDesc: 'Click sort by descend',
+    triggerAsc: 'Click sort by ascend',
+    cancelSort: 'Click to cancel sort',
   },
   Modal: {
     okText: 'OK',
@@ -60,3 +65,5 @@ export default {
     back: 'Back',
   },
 };
+
+export default localeValues;

@@ -1,9 +1,11 @@
 ---
-order: 4
+order: 5
 title: Use in TypeScript
 ---
 
 Let's create a TypeScript project by using `create-react-app`, then import `antd` step by step.
+
+> We build `antd` based on latest stable version of TypeScript (`>=3.8.4`), please make sure your project dependency matches it.
 
 ---
 
@@ -11,10 +13,14 @@ Let's create a TypeScript project by using `create-react-app`, then import `antd
 
 Ensure your system has installed latest version of [yarn](https://yarnpkg.com) or [npm](https://www.npmjs.com/).
 
-Create a new project named `antd-demo-ts` using yarn.
+Create a new [cra-template-typescript](https://github.com/facebook/create-react-app/tree/master/packages/cra-template-typescript) project named `antd-demo-ts` using yarn.
 
 ```bash
-$ yarn create react-app antd-demo-ts --typescript
+$ yarn create react-app antd-demo-ts --template typescript
+
+# or
+
+npx create-react-app my-app --template typescript
 ```
 
 If you are using npm (we will use yarn in the following instructions, it's ok to replace yarn with npm)

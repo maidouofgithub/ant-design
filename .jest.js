@@ -2,12 +2,15 @@ const libDir = process.env.LIB_DIR;
 
 const transformIgnorePatterns = [
   '/dist/',
-  'node_modules/[^/]+?/(?!(es|node_modules)/)', // Ignore modules without es dir
+  // Ignore modules without es dir.
+  // Update: @babel/runtime should also be transformed
+  'node_modules/(?!.*@babel)[^/]+?/(?!(es|node_modules)/)',
 ];
 
 module.exports = {
   verbose: true,
   setupFiles: ['./tests/setup.js'],
+  setupFilesAfterEnv: ['./tests/setupAfterEnv.ts'],
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'md'],
   modulePathIgnorePatterns: ['/_site/'],
   moduleNameMapper: {
@@ -31,7 +34,7 @@ module.exports = {
     '!components/*/style/index.tsx',
     '!components/style/index.tsx',
     '!components/*/locale/index.tsx',
-    '!components/*/__tests__/**/type.tsx',
+    '!components/*/__tests__/type.test.tsx',
     '!components/**/*/interface.{ts,tsx}',
   ],
   transformIgnorePatterns,

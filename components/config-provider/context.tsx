@@ -1,7 +1,7 @@
 import * as React from 'react';
-import createReactContext from '@ant-design/create-react-context';
 import defaultRenderEmpty, { RenderEmptyHandler } from './renderEmpty';
 import { Locale } from '../locale-provider';
+import { SizeType } from './SizeContext';
 
 export interface CSPConfig {
   nonce?: string;
@@ -18,9 +18,13 @@ export interface ConfigConsumerProps {
   pageHeader?: {
     ghost: boolean;
   };
+  direction?: 'ltr' | 'rtl';
+  space?: {
+    size?: SizeType | number;
+  };
 }
 
-export const ConfigContext = createReactContext<ConfigConsumerProps>({
+export const ConfigContext = React.createContext<ConfigConsumerProps>({
   // We provide a default function for Context without provider
   getPrefixCls: (suffixCls: string, customizePrefixCls?: string) => {
     if (customizePrefixCls) return customizePrefixCls;
@@ -54,7 +58,7 @@ interface ConstructorProps {
 export function withConfigConsumer<ExportProps extends BasicExportProps>(config: ConsumerConfig) {
   return function withConfigConsumerFunc<ComponentDef>(
     Component: IReactComponent,
-  ): React.SFC<ExportProps> & ComponentDef {
+  ): React.FC<ExportProps> & ComponentDef {
     // Wrap with ConfigConsumer. Since we need compatible with react 15, be care when using ref methods
     const SFC = ((props: ExportProps) => (
       <ConfigConsumer>
@@ -66,7 +70,7 @@ export function withConfigConsumer<ExportProps extends BasicExportProps>(config:
           return <Component {...configProps} {...props} prefixCls={prefixCls} />;
         }}
       </ConfigConsumer>
-    )) as React.SFC<ExportProps> & ComponentDef;
+    )) as React.FC<ExportProps> & ComponentDef;
 
     const cons: ConstructorProps = Component.constructor as ConstructorProps;
     const name = (cons && cons.displayName) || Component.name || 'Component';

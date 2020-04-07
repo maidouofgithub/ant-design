@@ -2,8 +2,9 @@ import Pagination from 'rc-pagination/lib/locale/zh_CN';
 import DatePicker from '../date-picker/locale/zh_CN';
 import TimePicker from '../time-picker/locale/zh_CN';
 import Calendar from '../calendar/locale/zh_CN';
+import { Locale } from '../locale-provider';
 
-export default {
+const localeValues: Locale = {
   locale: 'zh-cn',
   Pagination,
   DatePicker,
@@ -19,9 +20,13 @@ export default {
     filterReset: '重置',
     selectAll: '全选当页',
     selectInvert: '反选当页',
+    selectionAll: '全选所有',
     sortTitle: '排序',
     expand: '展开行',
     collapse: '关闭行',
+    triggerDesc: '点击降序',
+    triggerAsc: '点击升序',
+    cancelSort: '取消排序',
   },
   Modal: {
     okText: '确定',
@@ -60,3 +65,5 @@ export default {
     back: '返回',
   },
 };
+
+export default localeValues;

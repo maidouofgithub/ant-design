@@ -1,6 +1,10 @@
 const fs = require('fs');
 const path = require('path');
+// eslint-disable-next-line import/no-extraneous-dependencies
 const packageInfo = require('./package.json');
+const defaultVars = require('./scripts/default-vars');
+const darkVars = require('./scripts/dark-vars');
+const compactVars = require('./scripts/compact-vars');
 
 // We need compile additional content for antd user
 function finalizeCompile() {
@@ -16,7 +20,7 @@ function finalizeCompile() {
         `{ version: '${packageInfo.version}' }`,
       ),
     );
-    // eslint-disable-next-line
+    // eslint-disable-next-line no-console
     console.log('Wrote version into lib/version/index.js');
 
     // Build package.json version to lib/version/index.d.ts
@@ -26,7 +30,7 @@ function finalizeCompile() {
       versionDefPath,
       `declare var _default: "${packageInfo.version}";\nexport default _default;\n`,
     );
-    // eslint-disable-next-line
+    // eslint-disable-next-line no-console
     console.log('Wrote version into lib/version/index.d.ts');
 
     // Build a entry less file to dist/antd.less
@@ -47,6 +51,27 @@ function finalizeCompile() {
   }
 }
 
+function buildThemeFile(theme, vars) {
+  // Build less entry file: dist/antd.${theme}.less
+  fs.writeFileSync(
+    path.join(process.cwd(), 'dist', `antd.${theme}.less`),
+    `@import "../lib/style/${theme}.less";\n@import "../lib/style/components.less";`,
+  );
+
+  // eslint-disable-next-line no-console
+  console.log(`Built a entry less file to dist/antd.${theme}.less`);
+
+  // Build ${theme}.js: dist/${theme}-theme.js, for less-loader
+
+  fs.writeFileSync(
+    path.join(process.cwd(), 'dist', `${theme}-theme.js`),
+    `module.exports = ${JSON.stringify(vars, null, 2)};`,
+  );
+
+  // eslint-disable-next-line no-console
+  console.log(`Built a ${theme} theme js file to dist/${theme}-theme.js`);
+}
+
 function finalizeDist() {
   if (fs.existsSync(path.join(__dirname, './dist'))) {
     // Build less entry file: dist/antd.less
@@ -54,9 +79,11 @@ function finalizeDist() {
       path.join(process.cwd(), 'dist', 'antd.less'),
       '@import "../lib/style/index.less";\n@import "../lib/style/components.less";',
     );
-
-    // eslint-disable-next-line
+    // eslint-disable-next-line no-console
     console.log('Built a entry less file to dist/antd.less');
+    buildThemeFile('default', defaultVars);
+    buildThemeFile('dark', darkVars);
+    buildThemeFile('compact', compactVars);
   }
 }
 

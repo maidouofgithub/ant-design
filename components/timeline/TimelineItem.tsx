@@ -11,9 +11,10 @@ export interface TimeLineItemProps {
   pending?: boolean;
   position?: string;
   style?: React.CSSProperties;
+  label?: React.ReactNode;
 }
 
-const TimelineItem: React.SFC<TimeLineItemProps> = props => (
+const TimelineItem: React.FC<TimeLineItemProps> = props => (
   <ConfigConsumer>
     {({ getPrefixCls }: ConfigConsumerProps) => {
       const {
@@ -23,6 +24,7 @@ const TimelineItem: React.SFC<TimeLineItemProps> = props => (
         children,
         pending,
         dot,
+        label,
         ...restProps
       } = props;
 
@@ -43,6 +45,7 @@ const TimelineItem: React.SFC<TimeLineItemProps> = props => (
 
       return (
         <li {...omit(restProps, ['position'])} className={itemClassName}>
+          {label && <div className={`${prefixCls}-item-label`}>{label}</div>}
           <div className={`${prefixCls}-item-tail`} />
           <div
             className={dotClassName}

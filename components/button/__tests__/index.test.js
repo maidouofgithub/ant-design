@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import { render, mount } from 'enzyme';
+import { mount, render } from 'enzyme';
 import renderer from 'react-test-renderer';
+import { SearchOutlined } from '@ant-design/icons';
 import Button from '..';
-import Icon from '../../icon';
+import ConfigProvider from '../../config-provider';
 import mountTest from '../../../tests/shared/mountTest';
+import rtlTest from '../../../tests/shared/rtlTest';
 import { sleep } from '../../../tests/utils';
 
 describe('Button', () => {
@@ -13,54 +15,62 @@ describe('Button', () => {
   mountTest(Button.Group);
   mountTest(() => <Button.Group size="large" />);
   mountTest(() => <Button.Group size="small" />);
+  mountTest(() => <Button.Group size="middle" />);
+
+  rtlTest(Button);
+  rtlTest(() => <Button size="large" />);
+  rtlTest(() => <Button size="small" />);
+  rtlTest(Button.Group);
+  rtlTest(() => <Button.Group size="large" />);
+  rtlTest(() => <Button.Group size="small" />);
+  rtlTest(() => <Button.Group size="middle" />);
 
   it('renders correctly', () => {
-    const wrapper = render(<Button>Follow</Button>);
-    expect(wrapper).toMatchSnapshot();
+    expect(<Button>Follow</Button>).toMatchRenderedSnapshot();
   });
 
   it('mount correctly', () => {
-    if (process.env.REACT === '15') {
-      return;
-    }
     expect(() => renderer.create(<Button>Follow</Button>)).not.toThrow();
   });
 
+  it('warns if size is wrong', () => {
+    const mockWarn = jest.fn();
+    jest.spyOn(console, 'warn').mockImplementation(mockWarn);
+    render(<Button.Group size="who am I" />);
+    expect(mockWarn).toHaveBeenCalledTimes(1);
+    expect(mockWarn.mock.calls[0][0]).toMatchObject({
+      message: 'unreachable case: "who am I"',
+    });
+  });
+
   it('renders Chinese characters correctly', () => {
-    const wrapper = render(<Button>按钮</Button>);
-    expect(wrapper).toMatchSnapshot();
+    expect(<Button>按钮</Button>).toMatchRenderedSnapshot();
     // should not insert space when there is icon
-    const wrapper1 = render(<Button icon="search">按钮</Button>);
-    expect(wrapper1).toMatchSnapshot();
+    expect(<Button icon={<SearchOutlined />}>按钮</Button>).toMatchRenderedSnapshot();
     // should not insert space when there is icon
-    const wrapper2 = render(
+    expect(
       <Button>
-        <Icon type="search" />
+        <SearchOutlined />
         按钮
       </Button>,
-    );
-    expect(wrapper2).toMatchSnapshot();
+    ).toMatchRenderedSnapshot();
     // should not insert space when there is icon
-    const wrapper3 = render(<Button icon="search">按钮</Button>);
-    expect(wrapper3).toMatchSnapshot();
+    expect(<Button icon={<SearchOutlined />}>按钮</Button>).toMatchRenderedSnapshot();
     // should not insert space when there is icon while loading
-    const wrapper4 = render(
-      <Button icon="search" loading>
+    expect(
+      <Button icon={<SearchOutlined />} loading>
         按钮
       </Button>,
-    );
-    expect(wrapper4).toMatchSnapshot();
+    ).toMatchRenderedSnapshot();
     // should insert space while loading
-    const wrapper5 = render(<Button loading>按钮</Button>);
-    expect(wrapper5).toMatchSnapshot();
+    expect(<Button loading>按钮</Button>).toMatchRenderedSnapshot();
 
     // should insert space while only one nested element
-    const wrapper6 = render(
+    expect(
       <Button>
         <span>按钮</span>
       </Button>,
-    );
-    expect(wrapper6).toMatchSnapshot();
+    ).toMatchRenderedSnapshot();
   });
 
   it('renders Chinese characters correctly in HOC', () => {
@@ -85,8 +95,7 @@ describe('Button', () => {
 
   // https://github.com/ant-design/ant-design/issues/18118
   it('should not insert space to link button', () => {
-    const wrapper = render(<Button type="link">按钮</Button>);
-    expect(wrapper).toMatchSnapshot();
+    expect(<Button type="link">按钮</Button>).toMatchRenderedSnapshot();
   });
 
   it('should render empty button without errors', () => {
@@ -101,7 +110,6 @@ describe('Button', () => {
 
   it('have static property for type detecting', () => {
     const wrapper = mount(<Button>Button Text</Button>);
-    // eslint-disable-next-line
     expect(wrapper.type().__ANT_BUTTON).toBe(true);
   });
 
@@ -130,7 +138,6 @@ describe('Button', () => {
   });
 
   it('should change loading state with delay', () => {
-    // eslint-disable-next-line
     class DefaultButton extends Component {
       state = {
         loading: false,
@@ -175,20 +182,14 @@ describe('Button', () => {
   });
 
   it('fixbug renders {0} , 0 and {false}', () => {
-    const wrapper = render(<Button>{0}</Button>);
-    expect(wrapper).toMatchSnapshot();
-    const wrapper1 = render(<Button>0</Button>);
-    expect(wrapper1).toMatchSnapshot();
-    const wrapper2 = render(<Button>{false}</Button>);
-    expect(wrapper2).toMatchSnapshot();
+    expect(<Button>{0}</Button>).toMatchRenderedSnapshot();
+    expect(<Button>0</Button>).toMatchRenderedSnapshot();
+    expect(<Button>{false}</Button>).toMatchRenderedSnapshot();
   });
 
   it('should has click wave effect', async () => {
     const wrapper = mount(<Button type="primary">button</Button>);
-    wrapper
-      .find('.ant-btn')
-      .getDOMNode()
-      .click();
+    wrapper.find('.ant-btn').getDOMNode().click();
     await new Promise(resolve => setTimeout(resolve, 0));
     expect(wrapper.render()).toMatchSnapshot();
   });
@@ -235,5 +236,32 @@ describe('Button', () => {
     expect(() => {
       wrapper.unmount();
     }).not.toThrow();
+  });
+
+  it('should warning when pass a string as icon props', () => {
+    const warnSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mount(<Button type="primary" icon="ab" />);
+    expect(warnSpy).not.toHaveBeenCalled();
+    mount(<Button type="primary" icon="search" />);
+    expect(warnSpy).toHaveBeenCalledWith(
+      `Warning: [antd: Button] \`icon\` is using ReactNode instead of string naming in v4. Please check \`search\` at https://ant.design/components/icon`,
+    );
+    warnSpy.mockRestore();
+  });
+
+  it('skip check 2 words when ConfigProvider disable this', () => {
+    const wrapper = mount(
+      <ConfigProvider autoInsertSpaceInButton={false}>
+        <Button>test</Button>
+      </ConfigProvider>,
+    );
+
+    const btn = wrapper.find('button').instance();
+    Object.defineProperty(btn, 'textContent', {
+      get() {
+        throw new Error('Should not called!!!');
+      },
+    });
+    wrapper.find('Button').instance().forceUpdate();
   });
 });

@@ -2,9 +2,12 @@ import React from 'react';
 import { mount } from 'enzyme';
 import Popconfirm from '..';
 import mountTest from '../../../tests/shared/mountTest';
+import { sleep } from '../../../tests/utils';
+import rtlTest from '../../../tests/shared/rtlTest';
 
 describe('Popconfirm', () => {
   mountTest(Popconfirm);
+  rtlTest(Popconfirm);
 
   const eventObject = expect.objectContaining({
     target: expect.anything(),
@@ -36,7 +39,7 @@ describe('Popconfirm', () => {
     expect(onVisibleChange).toHaveBeenLastCalledWith(false, undefined);
   });
 
-  it('should show overlay when trigger is clicked', () => {
+  it('should show overlay when trigger is clicked', async () => {
     const popconfirm = mount(
       <Popconfirm title="code">
         <span>show me your code</span>
@@ -46,11 +49,32 @@ describe('Popconfirm', () => {
     expect(popconfirm.instance().getPopupDomNode()).toBe(null);
 
     popconfirm.find('span').simulate('click');
+    await sleep(100);
 
     const popup = popconfirm.instance().getPopupDomNode();
     expect(popup).not.toBe(null);
     expect(popup.className).toContain('ant-popover-placement-top');
     expect(popup.innerHTML).toMatchSnapshot();
+    expect(popup.innerHTML).toMatchSnapshot();
+  });
+
+  it('shows content for render functions', async () => {
+    const makeRenderFunction = content => () => content;
+
+    const popconfirm = mount(
+      <Popconfirm title={makeRenderFunction('some-title')}>
+        <span>show me your code</span>
+      </Popconfirm>,
+    );
+
+    expect(popconfirm.instance().getPopupDomNode()).toBe(null);
+
+    popconfirm.find('span').simulate('click');
+    await sleep(100);
+
+    const popup = popconfirm.instance().getPopupDomNode();
+    expect(popup).not.toBe(null);
+    expect(popup.innerHTML).toContain('some-title');
     expect(popup.innerHTML).toMatchSnapshot();
   });
 
@@ -67,7 +91,7 @@ describe('Popconfirm', () => {
     expect(popconfirm.instance().getPopupDomNode().className).not.toContain('ant-popover-hidden');
     popconfirm.setProps({ visible: false });
     jest.runAllTimers();
-    expect(popconfirm.instance().getPopupDomNode().className).toContain('ant-popover-hidden');
+    expect(popconfirm.find('Trigger').props().popupVisible).toBe(false);
     jest.useRealTimers();
   });
 

@@ -2,28 +2,15 @@ import React from 'react';
 import { render, mount } from 'enzyme';
 import { Col, Row } from '..';
 import mountTest from '../../../tests/shared/mountTest';
-
-jest.mock('enquire.js', () => {
-  let that;
-  let unmatchFun;
-  return {
-    unregister: jest.fn(),
-    register: (media, options) => {
-      if (media === '(max-width: 575px)') {
-        that = this;
-        options.match.call(that);
-        unmatchFun = options.unmatch;
-      }
-    },
-    callunmatch() {
-      unmatchFun.call(that);
-    },
-  };
-});
+import rtlTest from '../../../tests/shared/rtlTest';
+import useBreakpoint from '../hooks/useBreakpoint';
 
 describe('Grid', () => {
   mountTest(Row);
   mountTest(Col);
+
+  rtlTest(Row);
+  rtlTest(Col);
 
   it('should render Col', () => {
     const wrapper = render(<Col span={2} />);
@@ -88,22 +75,11 @@ describe('Grid', () => {
   });
 
   it('should work correct when gutter is object', () => {
-    // eslint-disable-next-line global-require
-    const enquire = require('enquire.js');
     const wrapper = mount(<Row gutter={{ xs: 20 }} />);
     expect(wrapper.find('div').prop('style')).toEqual({
       marginLeft: -10,
       marginRight: -10,
     });
-    enquire.callunmatch();
-    expect(
-      wrapper
-        .update()
-        .find('div')
-        .prop('style'),
-    ).toEqual({});
-    wrapper.unmount();
-    expect(enquire.unregister).toHaveBeenCalled();
   });
 
   it('should work currect when gutter is array', () => {
@@ -112,7 +88,29 @@ describe('Grid', () => {
       marginLeft: -8,
       marginRight: -8,
       marginTop: -10,
-      marginBottom: -10,
+      marginBottom: 10,
     });
+  });
+
+  // By jsdom mock, actual jsdom not implemented matchMedia
+  // https://jestjs.io/docs/en/manual-mocks#mocking-methods-which-are-not-implemented-in-jsdom
+  it('should work with useBreakpoint', () => {
+    function Demo() {
+      const screens = useBreakpoint();
+
+      return JSON.stringify(screens);
+    }
+    const wrapper = mount(<Demo />);
+
+    expect(wrapper.text()).toEqual(
+      JSON.stringify({
+        xs: true,
+        sm: false,
+        md: false,
+        lg: false,
+        xl: false,
+        xxl: false,
+      }),
+    );
   });
 });
